@@ -1,3 +1,4 @@
+
 # AI Career Coach
 
 ## Takım Bilgileri
@@ -89,7 +90,9 @@ Backlog, MVP gereksinimlerine göre önceliklendirilmiş ve küçük geliştirme
 
 Daily Scrum toplantıları WhatsApp üzerinden yapılmaktadır. 
 
-
+<img width="590" height="1278" alt="IMG_4027" src="https://github.com/user-attachments/assets/2bcaa943-74bf-4d7c-bc2d-69c8a654b16d" />
+<img width="590" height="1278" alt="IMG_4026" src="https://github.com/user-attachments/assets/11afa6df-3992-4b32-a98d-811617697dcc" />
+<img width="590" height="1278" alt="IMG_4025" src="https://github.com/user-attachments/assets/6a5d82a0-0dbb-4ea4-bf95-d5619777da6f" />
 
 ---
 
