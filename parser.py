@@ -4,7 +4,7 @@ from docx import Document
 
 def extract_text_from_file(file_path: str) -> str:
     """
-    Verilen dosya yoluna göre PDF veya DOCX içindeki metni çıkarır.
+    Verilen dosya yoluna göre PDF veya DOCX içindeki metni çıkarır ve temizler.
     """
     if not os.path.exists(file_path):
         return "Hata: Dosya bulunamadı!"
@@ -35,14 +35,15 @@ def extract_text_from_file(file_path: str) -> str:
     else:
         return "Hata: Desteklenmeyen dosya formatı! Lütfen PDF veya DOCX yükleyin."
 
-    # Gereksiz boşlukları temizleyelim
+    # Gereksiz boşlukları ve satır atlamalarını temizleyelim
     return text.strip()
 
-# --- TEST EDELİM ---
+# --- LOKAL TEST İÇİN ---
 if __name__ == "__main__":
-    # Test etmek için proje klasörüne örnek bir cv.pdf koyabiliriz
     ornek_dosya = "ornek_cv.pdf" 
-    
-    cikti = extract_text_from_file(ornek_dosya)
-    print("--- ÇIKARILAN METİN ---")
-    print(cikti[:500]) # Sadece ilk 500 karakteri ekrana basalım, çalıştığını görelim.
+    if os.path.exists(ornek_dosya):
+        cikti = extract_text_from_file(ornek_dosya)
+        print("--- ÇIKARILAN METİN ÖZETİ ---")
+        print(cikti[:300] + "...")
+    else:
+        print("ℹ️ Test için klasörde 'ornek_cv.pdf' bulunamadı, ancak parser fonksiyona hazır.")
