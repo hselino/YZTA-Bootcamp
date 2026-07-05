@@ -1,0 +1,8 @@
+*.pdf
+*.docx
+ornek_cv.pdf
+
+__pycache__/
+*.pyc
+
+.env 
