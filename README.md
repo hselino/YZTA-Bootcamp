@@ -86,7 +86,27 @@ Takım içi iletişimimiz ve günlük durum değerlendirmelerimiz düzenli olara
 ### Sprint Board Güncellemeleri
 <img width="1800" height="932" alt="Ekran Resmi 2026-07-05 18 13 19" src="https://github.com/user-attachments/assets/9035e628-40ec-47ea-879e-0f14e1fac6c7" />
 
+## Backlog Dağıtma Mantığı
 
+Sprint backlog'u ürünün MVP hedeflerine göre önceliklendirilmiştir.
+
+Görevler ekip üyelerinin uzmanlık alanlarına göre dağıtılmıştır.
+
+- **Product Owner (Sena Gül Kara)**  
+  Kullanıcı hikayelerinin hazırlanması, backlog yönetimi, ürün gereksinimlerinin belirlenmesi ve backend geliştirme süreçlerine destek verilmesi.
+
+- **Scrum Master / Frontend Developer (Hatice Selin Omur)**  
+  Sprint yönetimi, GitHub Projects Scrum Board takibi, UI tasarımları ve frontend geliştirmeleri.
+
+- **Backend Developer (Enes Bayraker, Sena Gül Kara)**  
+  API geliştirme, CV yükleme sistemi, dosya işleme süreçleri ve veritabanı tasarımı.
+
+- **AI Developer (Merve Sueda Aydın)**  
+  Yapay zeka modeli, prompt geliştirme, CV analiz sistemi ve skorlama mekanizmasının geliştirilmesi.
+
+Görevler GitHub Projects Scrum Board üzerinden takip edilmiştir.
+
+---
 
 ### Ürün Durumu
 
