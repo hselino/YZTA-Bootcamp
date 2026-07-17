@@ -1,8 +1,12 @@
 *.pdf
 *.docx
+*.doc
 ornek_cv.pdf
 
 __pycache__/
 *.pyc
 
-.env 
+.env
+
+uploads/
+tempCodeRunnerFile.py 
