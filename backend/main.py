@@ -7,11 +7,21 @@ from supabase import create_client
 import os
 from dotenv import load_dotenv
 from passlib.context import CryptContext
+from jose import jwt
+from datetime import datetime, timedelta
 
 app = FastAPI()
 load_dotenv()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+JWT_SECRET = os.environ.get("JWT_SECRET_KEY")
+JWT_ALGORITHM = "HS256"
+
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(hours=24)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
 supabase_url = os.environ.get("SUPABASE_URL")
 supabase_key = os.environ.get("SUPABASE_KEY")
 supabase = create_client(supabase_url, supabase_key)
@@ -68,6 +78,7 @@ def register(email: str, password: str, name: str):
 
     return {"message": "Kullanici basariyla kaydedildi", "email": email}
 
+
 @app.post("/login")
 def login(email: str, password: str):
     response = supabase.table("users").select("*").eq("email", email).execute()
@@ -80,8 +91,12 @@ def login(email: str, password: str):
     if not pwd_context.verify(password, user["password_hash"]):
         return {"error": "Sifre yanlis"}
 
+    token = create_access_token({"sub": user["email"]})
+
     return {
         "message": "Giris basarili",
+        "access_token": token,
+        "token_type": "bearer",
         "email": user["email"],
         "name": user["name"]
     }
