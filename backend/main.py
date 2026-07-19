@@ -67,3 +67,21 @@ def register(email: str, password: str, name: str):
     response = supabase.table("users").insert(data).execute()
 
     return {"message": "Kullanici basariyla kaydedildi", "email": email}
+
+@app.post("/login")
+def login(email: str, password: str):
+    response = supabase.table("users").select("*").eq("email", email).execute()
+
+    if len(response.data) == 0:
+        return {"error": "Kullanici bulunamadi"}
+
+    user = response.data[0]
+
+    if not pwd_context.verify(password, user["password_hash"]):
+        return {"error": "Sifre yanlis"}
+
+    return {
+        "message": "Giris basarili",
+        "email": user["email"],
+        "name": user["name"]
+    }
