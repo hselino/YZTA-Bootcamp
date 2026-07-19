@@ -6,10 +6,12 @@ import io
 from supabase import create_client
 import os
 from dotenv import load_dotenv
+from passlib.context import CryptContext
 
 app = FastAPI()
 load_dotenv()
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 supabase_url = os.environ.get("SUPABASE_URL")
 supabase_key = os.environ.get("SUPABASE_KEY")
 supabase = create_client(supabase_url, supabase_key)
@@ -51,3 +53,17 @@ async def upload_cv(file: UploadFile = File(...)):
 @app.get("/test-db")
 def test_db():
     return {"message": "Supabase baglantisi kuruldu", "url": supabase_url}
+
+@app.post("/register")
+def register(email: str, password: str, name: str):
+    hashed_password = pwd_context.hash(password)
+
+    data = {
+        "email": email,
+        "password_hash": hashed_password,
+        "name": name
+    }
+
+    response = supabase.table("users").insert(data).execute()
+
+    return {"message": "Kullanici basariyla kaydedildi", "email": email}
