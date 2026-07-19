@@ -1,5 +1,5 @@
-from fastapi import FastAPI
-from fastapi import FastAPI, UploadFile, File
+
+from fastapi import FastAPI, UploadFile, File, Depends, HTTPException, Header
 import fitz  # PyMuPDF, garip ama import ismi böyle
 import docx
 import io
@@ -29,8 +29,19 @@ supabase = create_client(supabase_url, supabase_key)
 def read_root():
     return {"message": "AI Career Coach backend çalışıyor!"}
 
+def verify_token(authorization: str = Header(...)):
+    try:
+        scheme, token = authorization.split()
+        if scheme.lower() != "bearer":
+            raise HTTPException(status_code=401, detail="Gecersiz token turu")
+
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return payload
+    except Exception:
+        raise HTTPException(status_code=401, detail="Gecersiz veya suresi dolmus token")
+    
 @app.post("/upload-cv")
-async def upload_cv(file: UploadFile = File(...)):
+async def upload_cv(file: UploadFile = File(...), user=Depends(verify_token)):
     content = await file.read()
     text = ""
 
