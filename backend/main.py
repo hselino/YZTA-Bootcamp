@@ -34,14 +34,15 @@ def verify_token(authorization: str = Header(...)):
 @app.post("/register")
 def register(email: str, password: str, name: str):
     try:
-        # Supabase Auth ile kullanıcı oluştur, name bilgisini metadata olarak ekle
-        response = supabase.auth.sign_up({
+        # Admin API ile olustur: sign_up'in aksine onay maili gondermez ve
+        # kullaniciyi aninda onaylanmis (email_confirm=True) olarak acar.
+        # Bu proje icin e-posta dogrulama akisi gerekmiyor.
+        response = supabase.auth.admin.create_user({
             "email": email,
             "password": password,
-            "options": {
-                "data": {
-                    "name": name
-                }
+            "email_confirm": True,
+            "user_metadata": {
+                "name": name
             }
         })
         return {"message": "Kullanici basariyla kaydedildi", "user": response.user}
