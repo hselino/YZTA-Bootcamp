@@ -111,3 +111,54 @@ def login(email: str, password: str):
         "email": user["email"],
         "name": user["name"]
     }
+
+
+def get_user_id_by_email(email: str):
+    response = supabase.table("users").select("id").eq("email", email).execute()
+    if len(response.data) == 0:
+        raise HTTPException(status_code=404, detail="Kullanici bulunamadi")
+    return response.data[0]["id"]
+
+
+@app.get("/analyses")
+def get_analyses(user=Depends(verify_token)):
+    user_id = get_user_id_by_email(user.get("sub"))
+    response = supabase.table("analyses").select("id", "file_name", "score_general", "created_at").eq("user_id", user_id).execute()
+    return response.data
+
+
+@app.get("/analyses/{analysis_id}")
+def get_analysis_detail(analysis_id: str, user=Depends(verify_token)):
+    user_id = get_user_id_by_email(user.get("sub"))
+    response = supabase.table("analyses").select("*").eq("id", analysis_id).eq("user_id", user_id).execute()
+    if len(response.data) == 0:
+        raise HTTPException(status_code=404, detail="Analiz bulunamadi veya bu analize erisim yetkiniz yok")
+    return response.data[0]
+
+
+@app.get("/roadmaps")
+def get_roadmaps(user=Depends(verify_token)):
+    user_id = get_user_id_by_email(user.get("sub"))
+    response = supabase.table("roadmaps").select("*").eq("user_id", user_id).order("step_order").execute()
+    return response.data
+
+
+@app.get("/interviews")
+def get_interviews(user=Depends(verify_token)):
+    user_id = get_user_id_by_email(user.get("sub"))
+    response = supabase.table("interviews").select("*").eq("user_id", user_id).execute()
+    return response.data
+
+
+@app.post("/interviews")
+def save_interview(position: str, difficulty: str, questions: list, answers: list, user=Depends(verify_token)):
+    user_id = get_user_id_by_email(user.get("sub"))
+    data = {
+        "user_id": user_id,
+        "position": position,
+        "difficulty": difficulty,
+        "questions": questions,
+        "answers": answers
+    }
+    response = supabase.table("interviews").insert(data).execute()
+    return {"message": "Mulakat basariyla kaydedildi", "data": response.data}
