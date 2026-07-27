@@ -1,4 +1,10 @@
 .env
+*.pdf
+*.docx
+*.doc
+__pycache__/
+*.pyc
+uploads/
+tempCodeRunnerFile.py
 backend/venv/
 backend/__pycache__/
-*.pyc

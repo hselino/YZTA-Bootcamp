@@ -1,15 +1,29 @@
-from fastapi import FastAPI, UploadFile, File, Form, Depends, HTTPException, Header
-import fitz  # PyMuPDF
-import docx
-import io
-from supabase import create_client
 import os
+import io
+import logging
+from fastapi import FastAPI, UploadFile, File, Form, Depends, HTTPException, Header
+from fastapi.middleware.cors import CORSMiddleware
+import fitz
+import docx
+from supabase import create_client
 from dotenv import load_dotenv
 
 from ai_service import cv_analiz_et_json
 
-app = FastAPI()
+logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
+logger = logging.getLogger("ai-career-coach")
+
 load_dotenv()
+
+app = FastAPI(title="AI Career Coach API", version="3.0.0")
+
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_ORIGINS,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 supabase_url = os.environ.get("SUPABASE_URL")
 supabase_key = os.environ.get("SUPABASE_KEY")
@@ -17,37 +31,32 @@ supabase = create_client(supabase_url, supabase_key)
 
 
 def _fresh_admin_client():
-    # supabase-py, sign_in_with_password/admin cagrilarinda o islemin token'ini
-    # client'in varsayilan Authorization header'ina yaziyor. Global "supabase"
-    # nesnesi butun request'ler arasinda paylasildigi icin, bunu paylasilan
-    # client uzerinde yapmak digre kullanicilarin/islemlerin service-role
-    # yetkisini kaybetmesine yol aciyordu ("User not allowed" hatasi).
-    # Login/register icin her seferinde tek kullanimlik, izole bir client
-    # olusturarak global "supabase" client'i her zaman service-role olarak kalir.
     return create_client(supabase_url, supabase_key)
+
+MAX_FILE_SIZE = 10 * 1024 * 1024
+ALLOWED_EXTENSIONS = {".pdf", ".docx"}
 
 @app.get("/")
 def read_root():
-    return {"message": "AI Career Coach backend çalışıyor!"}
+    logger.info("Health check")
+    return {"message": "AI Career Coach backend çalışıyor!", "version": "3.0.0", "status": "healthy"}
 
 def verify_token(authorization: str = Header(...)):
     try:
         scheme, token = authorization.split()
         if scheme.lower() != "bearer":
             raise HTTPException(status_code=401, detail="Gecersiz token turu")
-
-        # Token'ı Supabase Auth üzerinden doğrula ve kullanıcıyı al
         user_response = supabase.auth.get_user(token)
-        return user_response.user  # User nesnesi döner, id alanı UUID'dir
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=f"Gecersiz veya suresi dolmus token: {str(e)}")
+        return user_response.user
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Token dogrulama hatasi")
+        raise HTTPException(status_code=401, detail="Gecersiz veya suresi dolmus token")
 
 @app.post("/register")
 def register(email: str, password: str, name: str):
     try:
-        # Admin API ile olustur: sign_up'in aksine onay maili gondermez ve
-        # kullaniciyi aninda onaylanmis (email_confirm=True) olarak acar.
-        # Bu proje icin e-posta dogrulama akisi gerekmiyor.
         response = _fresh_admin_client().auth.admin.create_user({
             "email": email,
             "password": password,
@@ -56,27 +65,29 @@ def register(email: str, password: str, name: str):
                 "name": name
             }
         })
+        logger.info("Yeni kullanici kaydedildi: %s", email)
         return {"message": "Kullanici basariyla kaydedildi", "user": response.user}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Kayit hatasi: {str(e)}")
+    except Exception:
+        logger.error("Kayit hatasi: %s", email)
+        raise HTTPException(status_code=400, detail="Kayit sirasinda bir hata olustu")
 
 @app.post("/login")
 def login(email: str, password: str):
     try:
-        # Supabase Auth ile giriş yap
         response = _fresh_admin_client().auth.sign_in_with_password({
             "email": email,
             "password": password
         })
+        logger.info("Kullanici girisi: %s", email)
         return {
             "message": "Giris basarili",
             "access_token": response.session.access_token,
             "token_type": "bearer",
             "email": response.user.email,
-            "name": response.user.user_metadata.get("name") if response.user.user_metadata else None
         }
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Giris hatasi: {str(e)}")
+    except Exception:
+        logger.error("Giris hatasi: %s", email)
+        raise HTTPException(status_code=401, detail="Email veya sifre hatali")
 
 @app.post("/upload-cv")
 async def upload_cv(
@@ -85,29 +96,40 @@ async def upload_cv(
     test_modu: bool = Form(False),
     user=Depends(verify_token),
 ):
-    content = await file.read()
-    text = ""
+    if not file.filename:
+        raise HTTPException(400, "Dosya adi bulunamadi")
 
-    if file.filename.endswith(".pdf"):
+    file_ext = os.path.splitext(file.filename)[1].lower()
+    if file_ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(400, "Yalnizca PDF ve DOCX dosyalari kabul edilir")
+
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(400, "Dosya boyutu 10MB'dan buyuk olamaz")
+
+    text = ""
+    if file_ext == ".pdf":
         pdf = fitz.open(stream=content, filetype="pdf")
         for page in pdf:
             text += page.get_text()
-
-    elif file.filename.endswith(".docx"):
+    elif file_ext == ".docx":
         doc = docx.Document(io.BytesIO(content))
         for paragraph in doc.paragraphs:
             text += paragraph.text + "\n"
 
-    else:
-        raise HTTPException(400, "Sadece PDF veya DOCX dosyaları destekleniyor")
+    if not text.strip():
+        raise HTTPException(400, "Dosyadan metin cikarilamadi")
 
     supabase.table("cv_uploads").insert({
         "filename": file.filename,
         "content_text": text,
     }).execute()
 
+    logger.info("CV analizi basliyor | hedef_rol=%s | test_modu=%s", hedef_rol or "yok", test_modu)
     ai_result = cv_analiz_et_json(text, hedef_rol=hedef_rol, test_modu=test_modu)
+
     if "hata" in ai_result:
+        logger.error("AI analiz hatasi: %s", ai_result["hata"])
         raise HTTPException(500, ai_result["hata"])
 
     scorecard = ai_result["puan_karnesi"]
@@ -126,11 +148,12 @@ async def upload_cv(
         "improvement_suggestions": ai_result["duzeltme_onerileri"],
     }).execute()
 
+    logger.info("CV analizi tamamlandi | kullanici=%s", user.id)
     return ai_result
 
-@app.get("/test-db")
-def test_db():
-    return {"message": "Supabase baglantisi kuruldu", "url": supabase_url}
+@app.get("/health")
+def health():
+    return {"message": "Supabase baglantisi aktif", "status": "ok"}
 
 @app.get("/analyses")
 def get_analyses(user=Depends(verify_token)):
