@@ -19,3 +19,8 @@ python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
 PyMuPDF>=1.23.0
 python-docx>=1.1.0
+
+# AI analiz (ai_service.py) - AI_PROVIDER=gemini icin google-genai, groq icin groq gerekir.
+# AI_PROVIDER ayarlanmadan/test_modu=true ile calisildiginda ikisi de gerekmez.
+google-genai>=1.0.0
+groq>=1.5.0
