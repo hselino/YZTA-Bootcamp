@@ -134,7 +134,13 @@ def test_db():
 
 @app.get("/analyses")
 def get_analyses(user=Depends(verify_token)):
-    response = supabase.table("analyses").select("id", "file_name", "score_general", "created_at").eq("user_id", user.id).execute()
+    response = (
+        supabase.table("analyses")
+        .select("id", "file_name", "score_general", "created_at")
+        .eq("user_id", user.id)
+        .order("created_at", desc=True)
+        .execute()
+    )
     return response.data
 
 def _row_to_analysis_response(row: dict) -> dict:
