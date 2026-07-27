@@ -15,6 +15,17 @@ supabase_url = os.environ.get("SUPABASE_URL")
 supabase_key = os.environ.get("SUPABASE_KEY")
 supabase = create_client(supabase_url, supabase_key)
 
+
+def _fresh_admin_client():
+    # supabase-py, sign_in_with_password/admin cagrilarinda o islemin token'ini
+    # client'in varsayilan Authorization header'ina yaziyor. Global "supabase"
+    # nesnesi butun request'ler arasinda paylasildigi icin, bunu paylasilan
+    # client uzerinde yapmak digre kullanicilarin/islemlerin service-role
+    # yetkisini kaybetmesine yol aciyordu ("User not allowed" hatasi).
+    # Login/register icin her seferinde tek kullanimlik, izole bir client
+    # olusturarak global "supabase" client'i her zaman service-role olarak kalir.
+    return create_client(supabase_url, supabase_key)
+
 @app.get("/")
 def read_root():
     return {"message": "AI Career Coach backend çalışıyor!"}
@@ -37,7 +48,7 @@ def register(email: str, password: str, name: str):
         # Admin API ile olustur: sign_up'in aksine onay maili gondermez ve
         # kullaniciyi aninda onaylanmis (email_confirm=True) olarak acar.
         # Bu proje icin e-posta dogrulama akisi gerekmiyor.
-        response = supabase.auth.admin.create_user({
+        response = _fresh_admin_client().auth.admin.create_user({
             "email": email,
             "password": password,
             "email_confirm": True,
@@ -53,7 +64,7 @@ def register(email: str, password: str, name: str):
 def login(email: str, password: str):
     try:
         # Supabase Auth ile giriş yap
-        response = supabase.auth.sign_in_with_password({
+        response = _fresh_admin_client().auth.sign_in_with_password({
             "email": email,
             "password": password
         })
