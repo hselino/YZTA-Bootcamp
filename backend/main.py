@@ -1,30 +1,18 @@
-
 from fastapi import FastAPI, UploadFile, File, Depends, HTTPException, Header
-import fitz  # PyMuPDF, garip ama import ismi böyle
+import fitz  # PyMuPDF
 import docx
 import io
 from supabase import create_client
 import os
 from dotenv import load_dotenv
-from passlib.context import CryptContext
-from jose import jwt
-from datetime import datetime, timedelta
 
 app = FastAPI()
 load_dotenv()
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-JWT_SECRET = os.environ.get("JWT_SECRET_KEY")
-JWT_ALGORITHM = "HS256"
-
-def create_access_token(data: dict):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(hours=24)
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
 supabase_url = os.environ.get("SUPABASE_URL")
 supabase_key = os.environ.get("SUPABASE_KEY")
 supabase = create_client(supabase_url, supabase_key)
+
 @app.get("/")
 def read_root():
     return {"message": "AI Career Coach backend çalışıyor!"}
@@ -35,11 +23,47 @@ def verify_token(authorization: str = Header(...)):
         if scheme.lower() != "bearer":
             raise HTTPException(status_code=401, detail="Gecersiz token turu")
 
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        return payload
-    except Exception:
-        raise HTTPException(status_code=401, detail="Gecersiz veya suresi dolmus token")
-    
+        # Token'ı Supabase Auth üzerinden doğrula ve kullanıcıyı al
+        user_response = supabase.auth.get_user(token)
+        return user_response.user  # User nesnesi döner, id alanı UUID'dir
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"Gecersiz veya suresi dolmus token: {str(e)}")
+
+@app.post("/register")
+def register(email: str, password: str, name: str):
+    try:
+        # Supabase Auth ile kullanıcı oluştur, name bilgisini metadata olarak ekle
+        response = supabase.auth.sign_up({
+            "email": email,
+            "password": password,
+            "options": {
+                "data": {
+                    "name": name
+                }
+            }
+        })
+        return {"message": "Kullanici basariyla kaydedildi", "user": response.user}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Kayit hatasi: {str(e)}")
+
+@app.post("/login")
+def login(email: str, password: str):
+    try:
+        # Supabase Auth ile giriş yap
+        response = supabase.auth.sign_in_with_password({
+            "email": email,
+            "password": password
+        })
+        return {
+            "message": "Giris basarili",
+            "access_token": response.session.access_token,
+            "token_type": "bearer",
+            "email": response.user.email,
+            "name": response.user.user_metadata.get("name") if response.user.user_metadata else None
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Giris hatasi: {str(e)}")
+
 @app.post("/upload-cv")
 async def upload_cv(file: UploadFile = File(...), user=Depends(verify_token)):
     content = await file.read()
@@ -63,6 +87,8 @@ async def upload_cv(file: UploadFile = File(...), user=Depends(verify_token)):
         "content_text": text
     }
 
+    # Not: cv_uploads tablosuna kaydederken user_id eklemek isterseniz:
+    # data["user_id"] = user.id
     response = supabase.table("cv_uploads").insert(data).execute()
 
     return {
@@ -75,90 +101,37 @@ async def upload_cv(file: UploadFile = File(...), user=Depends(verify_token)):
 def test_db():
     return {"message": "Supabase baglantisi kuruldu", "url": supabase_url}
 
-@app.post("/register")
-def register(email: str, password: str, name: str):
-    hashed_password = pwd_context.hash(password)
-
-    data = {
-        "email": email,
-        "password_hash": hashed_password,
-        "name": name
-    }
-
-    response = supabase.table("users").insert(data).execute()
-
-    return {"message": "Kullanici basariyla kaydedildi", "email": email}
-
-
-@app.post("/login")
-def login(email: str, password: str):
-    response = supabase.table("users").select("*").eq("email", email).execute()
-
-    if len(response.data) == 0:
-        return {"error": "Kullanici bulunamadi"}
-
-    user = response.data[0]
-
-    if not pwd_context.verify(password, user["password_hash"]):
-        return {"error": "Sifre yanlis"}
-
-    token = create_access_token({"sub": user["email"]})
-
-    return {
-        "message": "Giris basarili",
-        "access_token": token,
-        "token_type": "bearer",
-        "email": user["email"],
-        "name": user["name"]
-    }
-
-
-def get_user_id_by_email(email: str):
-    response = supabase.table("users").select("id").eq("email", email).execute()
-    if len(response.data) == 0:
-        raise HTTPException(status_code=404, detail="Kullanici bulunamadi")
-    return response.data[0]["id"]
-
-
 @app.get("/analyses")
 def get_analyses(user=Depends(verify_token)):
-    user_id = get_user_id_by_email(user.get("sub"))
-    response = supabase.table("analyses").select("id", "file_name", "score_general", "created_at").eq("user_id", user_id).execute()
+    response = supabase.table("analyses").select("id", "file_name", "score_general", "created_at").eq("user_id", user.id).execute()
     return response.data
-
 
 @app.get("/analyses/{analysis_id}")
 def get_analysis_detail(analysis_id: str, user=Depends(verify_token)):
-    user_id = get_user_id_by_email(user.get("sub"))
-    response = supabase.table("analyses").select("*").eq("id", analysis_id).eq("user_id", user_id).execute()
+    response = supabase.table("analyses").select("*").eq("id", analysis_id).eq("user_id", user.id).execute()
     if len(response.data) == 0:
         raise HTTPException(status_code=404, detail="Analiz bulunamadi veya bu analize erisim yetkiniz yok")
     return response.data[0]
 
-
 @app.get("/roadmaps")
 def get_roadmaps(user=Depends(verify_token)):
-    user_id = get_user_id_by_email(user.get("sub"))
-    response = supabase.table("roadmaps").select("*").eq("user_id", user_id).order("step_order").execute()
+    response = supabase.table("roadmaps").select("*").eq("user_id", user.id).order("step_order").execute()
     return response.data
-
 
 @app.get("/interviews")
 def get_interviews(user=Depends(verify_token)):
-    user_id = get_user_id_by_email(user.get("sub"))
-    response = supabase.table("interviews").select("*").eq("user_id", user_id).execute()
+    response = supabase.table("interviews").select("*").eq("user_id", user.id).execute()
     return response.data
-
 
 @app.post("/interviews")
 def save_interview(position: str, difficulty: str, questions: list, answers: list, user=Depends(verify_token)):
-    user_id = get_user_id_by_email(user.get("sub"))
     data = {
-        "user_id": user_id,
+        "user_id": user.id,
         "position": position,
         "difficulty": difficulty,
         "questions": questions,
         "answers": answers
     }
     response = supabase.table("interviews").insert(data).execute()
-    return {"message": "Mulakat basariyla kaydedildi", "data": response.data}
+    return {"message": "Mulakat basariyla kaydedildi", "data": response.data}
+
