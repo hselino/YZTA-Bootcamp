@@ -1,8 +1,11 @@
 import os
 import json
+import logging
 from dotenv import load_dotenv
 
 load_dotenv()
+
+logger = logging.getLogger("ai-career-coach")
 
 AI_PROVIDER = os.getenv("AI_PROVIDER", "groq").lower()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
@@ -13,12 +16,13 @@ genai_client = None
 
 if AI_PROVIDER == "gemini":
     from google import genai as genai_sdk
-    from google.genai import types
     genai_client = genai_sdk.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
+    logger.info("AI sağlayıcı: Gemini")
 else:
     if GROQ_API_KEY:
         from groq import Groq
         groq_client = Groq(api_key=GROQ_API_KEY)
+        logger.info("AI sağlayıcı: Groq")
 
 
 def _build_prompt(hedef_rol=None):
@@ -90,9 +94,19 @@ def _analyze_with_gemini(prompt, cv_metni):
     return json.loads(response.text)
 
 
+MAX_CV_TOKENS = 8000
+
+
+def _truncate_cv(cv_metni: str, max_chars: int = MAX_CV_TOKENS * 4) -> str:
+    if len(cv_metni) > max_chars:
+        logger.warning("CV metni %d karakter (max %d), kırpılıyor...", len(cv_metni), max_chars)
+        return cv_metni[:max_chars] + "\n\n--- [METIN KISALTILDI, DEVAMI OKUNAMADI] ---"
+    return cv_metni
+
+
 def cv_analiz_et_json(cv_metni: str, hedef_rol: str = None, test_modu: bool = False):
     if test_modu:
-        print("[TEST MODU AKTIF] AI'a gidilmedi, aninda test verisi donduruluyor...")
+        logger.info("TEST MODU: AI'a gidilmedi, test verisi donduruluyor")
         return {
             "puan_karnesi": {
                 "genel_puan": 63,
@@ -137,9 +151,15 @@ def cv_analiz_et_json(cv_metni: str, hedef_rol: str = None, test_modu: bool = Fa
             "hata": "Yuklediginiz dosya bos veya bir CV okunamadi! Lutfen en az 50 karakter iceren gecerli bir CV yukleyin."
         }
 
-    print(f"AI CV'yi inceliyor... (Hedef Rol: {hedef_rol if hedef_rol else 'Genel Degerlendirme'})")
+    logger.info("AI CV'yi inceliyor... (Hedef Rol: %s)", hedef_rol or "Genel Degerlendirme")
 
+    cv_metni = _truncate_cv(cv_metni)
     prompt = _build_prompt(hedef_rol)
+
+    if AI_PROVIDER == "gemini" and not genai_client:
+        return {"hata": "Gemini API anahtari .env dosyasinda bulunamadi. Lutfen GEMINI_API_KEY ekleyin."}
+    if AI_PROVIDER != "gemini" and not groq_client:
+        return {"hata": "Groq API anahtari .env dosyasinda bulunamadi. Lutfen GROQ_API_KEY ekleyin."}
 
     try:
         if AI_PROVIDER == "gemini":
@@ -151,6 +171,6 @@ def cv_analiz_et_json(cv_metni: str, hedef_rol: str = None, test_modu: bool = Fa
 
 
 if __name__ == "__main__":
-    print("--- MOCK DATA TESTI ---")
+    logging.basicConfig(level=logging.INFO)
     sonuc = cv_analiz_et_json("Rastgele metin", hedef_rol="Siber Guvenlik", test_modu=True)
     print(json.dumps(sonuc, indent=4, ensure_ascii=False))

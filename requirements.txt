@@ -9,3 +9,4 @@ pypdfium2==5.12.1
 pytesseract==0.3.13
 Pillow
 google-genai==2.12.1
+slowapi==0.1.9
