@@ -5,8 +5,17 @@ import io
 from supabase import create_client
 import os
 from dotenv import load_dotenv
+from pydantic import BaseModel
 
 app = FastAPI()
+
+class ProfileCreate(BaseModel):
+    full_name: str
+    education_status: str
+    target_role: str
+    experience_level: str
+    support_needs: list[str]
+
 load_dotenv()
 
 supabase_url = os.environ.get("SUPABASE_URL")
@@ -134,4 +143,36 @@ def save_interview(position: str, difficulty: str, questions: list, answers: lis
     }
     response = supabase.table("interviews").insert(data).execute()
     return {"message": "Mulakat basariyla kaydedildi", "data": response.data}
+
+
+@app.post("/profile")
+def create_or_update_profile(profile: ProfileCreate, user=Depends(verify_token)):
+    try:
+        data = {
+            "id": user.id,
+            "full_name": profile.full_name,
+            "education_status": profile.education_status,
+            "target_role": profile.target_role,
+            "experience_level": profile.experience_level,
+            "support_needs": profile.support_needs
+        }
+        # upsert, kayıt varsa günceller, yoksa yeni kayıt oluşturur.
+        response = supabase.table("profiles").upsert(data).execute()
+        return {"message": "Profil basariyla kaydedildi", "profile": response.data[0]}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Profil kayit hatasi: {str(e)}")
+
+
+@app.get("/profile")
+def get_profile(user=Depends(verify_token)):
+    try:
+        response = supabase.table("profiles").select("*").eq("id", user.id).execute()
+        if len(response.data) == 0:
+            raise HTTPException(status_code=404, detail="Profil bulunamadi. Onboarding tamamlanmamis olabilir.")
+        return response.data[0]
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Profil getirme hatasi: {str(e)}")
+
 
