@@ -1,8 +1,11 @@
 import os
 import io
 import logging
+from datetime import datetime, timezone
 from fastapi import FastAPI, UploadFile, File, Form, Depends, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import Optional
 import fitz
 import docx
 from supabase import create_client
@@ -35,6 +38,13 @@ def _fresh_admin_client():
 
 MAX_FILE_SIZE = 10 * 1024 * 1024
 ALLOWED_EXTENSIONS = {".pdf", ".docx"}
+
+class ProfileData(BaseModel):
+    name: Optional[str] = None
+    education: Optional[str] = None
+    target_role: Optional[str] = None
+    experience: Optional[str] = None
+    support_needs: Optional[list[str]] = None
 
 @app.get("/")
 def read_root():
@@ -125,8 +135,14 @@ async def upload_cv(
         "content_text": text,
     }).execute()
 
-    logger.info("CV analizi basliyor | hedef_rol=%s | test_modu=%s", hedef_rol or "yok", test_modu)
-    ai_result = cv_analiz_et_json(text, hedef_rol=hedef_rol, test_modu=test_modu)
+    profil = supabase.table("profiles").select("education", "experience", "target_role").eq("user_id", user.id).execute()
+    egitim = profil.data[0].get("education") if profil.data else None
+    deneyim = profil.data[0].get("experience") if profil.data else None
+    if not hedef_rol and profil.data:
+        hedef_rol = hedef_rol or profil.data[0].get("target_role")
+
+    logger.info("CV analizi basliyor | hedef_rol=%s | test_modu=%s | egitim=%s | deneyim=%s", hedef_rol or "yok", test_modu, egitim or "yok", deneyim or "yok")
+    ai_result = cv_analiz_et_json(text, hedef_rol=hedef_rol, test_modu=test_modu, egitim=egitim, deneyim=deneyim)
 
     if "hata" in ai_result:
         logger.error("AI analiz hatasi: %s", ai_result["hata"])
@@ -212,4 +228,30 @@ def save_interview(position: str, difficulty: str, questions: list, answers: lis
     }
     response = supabase.table("interviews").insert(data).execute()
     return {"message": "Mulakat basariyla kaydedildi", "data": response.data}
+
+@app.post("/profile")
+def save_profile(data: ProfileData, user=Depends(verify_token)):
+    existing = supabase.table("profiles").select("*").eq("user_id", user.id).execute()
+    payload = data.model_dump(exclude_none=True)
+    payload["user_id"] = user.id
+    now = datetime.now(timezone.utc).isoformat()
+
+    if len(existing.data) > 0:
+        payload["updated_at"] = now
+        supabase.table("profiles").update(payload).eq("user_id", user.id).execute()
+        logger.info("Profil guncellendi: %s", user.id)
+    else:
+        payload["created_at"] = now
+        payload["updated_at"] = now
+        supabase.table("profiles").insert(payload).execute()
+        logger.info("Profil olusturuldu: %s", user.id)
+
+    return {"message": "Profil basariyla kaydedildi"}
+
+@app.get("/profile")
+def get_profile(user=Depends(verify_token)):
+    response = supabase.table("profiles").select("*").eq("user_id", user.id).execute()
+    if len(response.data) == 0:
+        return {}
+    return response.data[0]
 

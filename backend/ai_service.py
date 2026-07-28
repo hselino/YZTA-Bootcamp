@@ -21,15 +21,23 @@ else:
         groq_client = Groq(api_key=GROQ_API_KEY)
 
 
-def _build_prompt(hedef_rol=None):
+def _build_prompt(hedef_rol=None, egitim=None, deneyim=None):
     rol_talimati = (
         f"Hedef rol: '{hedef_rol}'. Tum analiz ve oneriler bu role gore yap."
         if hedef_rol
         else "Hedef rol belirtilmemis. CV'yi icerik, yapi, dil ve sunum kalitesi acisindan genel olarak degerlendir."
     )
 
+    profil_talimati = ""
+    if egitim:
+        profil_talimati += f"Kullanici egitim duzeyi: '{egitim}'. "
+    if deneyim:
+        profil_talimati += f"Kullanici deneyim seviyesi: '{deneyim}'. "
+    if profil_talimati:
+        profil_talimati = f"\nKullanici profili: {profil_talimati}CV'yi bu profil baglaminda degerlendir, seviyeye uygun gercekci ve yapici oneriler ver.\n"
+
     return f"""
-Sen bir AI Kariyer Kocusun. {rol_talimati}
+Sen bir AI Kariyer Kocusun. {rol_talimati}{profil_talimati}
 
 SADECE gecerli JSON dondur, baska hicbir sey yazma. Tum cikti TURKCE, dil bilgisi kurallarina uygun ve dogal olmali.
 
@@ -90,7 +98,7 @@ def _analyze_with_gemini(prompt, cv_metni):
     return json.loads(response.text)
 
 
-def cv_analiz_et_json(cv_metni: str, hedef_rol: str = None, test_modu: bool = False):
+def cv_analiz_et_json(cv_metni: str, hedef_rol: str = None, test_modu: bool = False, egitim: str = None, deneyim: str = None):
     if test_modu:
         print("[TEST MODU AKTIF] AI'a gidilmedi, aninda test verisi donduruluyor...")
         return {
@@ -101,7 +109,7 @@ def cv_analiz_et_json(cv_metni: str, hedef_rol: str = None, test_modu: bool = Fa
                 "etki_odaklilik": 45,
             },
             "ozet_degerlendirme": "[TEST MODU] CV genel olarak orta seviyede. Teknik beceriler listelenmis ancak projelerdeki etki ve sonuclar yeterince vurgulanmamis. CV'nin yapisi duzenli fakat icerik derinligi eksik. Adayin potansiyeli var ancak CV'si bunu tam olarak yansitamiyor. Ozellikle basari metrikleri ve somut ciktilarla guclendirilmeli.",
-            "hedef_role_uygunluk": f"Aday '{hedef_rol or 'Genel'}' rolu icin orta duzeyde hazirlikli gorunuyor.",
+            "hedef_role_uygunluk": f"Aday '{hedef_rol or 'Genel'}' rolu icin orta duzeyde hazirlikli gorunuyor. (TEST MODU - egitim: {egitim or 'belirtilmemis'}, deneyim: {deneyim or 'belirtilmemis'})",
             "guclu_yonler": [
                 "Teknik beceriler Python, React, FastAPI gibi modern teknolojiler iceriyor",
                 "Egitim gecmisi ve sektor bilgisi saglam",
@@ -137,9 +145,11 @@ def cv_analiz_et_json(cv_metni: str, hedef_rol: str = None, test_modu: bool = Fa
             "hata": "Yuklediginiz dosya bos veya bir CV okunamadi! Lutfen en az 50 karakter iceren gecerli bir CV yukleyin."
         }
 
-    print(f"AI CV'yi inceliyor... (Hedef Rol: {hedef_rol if hedef_rol else 'Genel Degerlendirme'})")
+    profil_str = f" | Egitim: {egitim}" if egitim else ""
+    profil_str += f" | Deneyim: {deneyim}" if deneyim else ""
+    print(f"AI CV'yi inceliyor... (Hedef Rol: {hedef_rol if hedef_rol else 'Genel Degerlendirme'}{profil_str})")
 
-    prompt = _build_prompt(hedef_rol)
+    prompt = _build_prompt(hedef_rol, egitim, deneyim)
 
     try:
         if AI_PROVIDER == "gemini":
@@ -152,5 +162,5 @@ def cv_analiz_et_json(cv_metni: str, hedef_rol: str = None, test_modu: bool = Fa
 
 if __name__ == "__main__":
     print("--- MOCK DATA TESTI ---")
-    sonuc = cv_analiz_et_json("Rastgele metin", hedef_rol="Siber Guvenlik", test_modu=True)
+    sonuc = cv_analiz_et_json("Rastgele metin", hedef_rol="Siber Guvenlik", test_modu=True, egitim="Lisans Mezunu", deneyim="1-3 Yıl")
     print(json.dumps(sonuc, indent=4, ensure_ascii=False))
