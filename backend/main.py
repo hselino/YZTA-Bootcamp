@@ -135,16 +135,11 @@ async def upload_cv(
         "content_text": text,
     }).execute()
 
-    egitim = deneyim = None
-    try:
-        profil = supabase.table("profiles").select("education", "experience", "target_role").eq("user_id", user.id).execute()
-        if profil.data:
-            egitim = profil.data[0].get("education")
-            deneyim = profil.data[0].get("experience")
-            if not hedef_rol:
-                hedef_rol = profil.data[0].get("target_role")
-    except Exception:
-        logger.warning("Profil tablosu bulunamadi, profil bilgisi kullanilmadan devam ediliyor")
+    meta = getattr(user, "user_metadata", {}) or {}
+    egitim = meta.get("education")
+    deneyim = meta.get("experience")
+    if not hedef_rol:
+        hedef_rol = meta.get("target_role")
 
     logger.info("CV analizi basliyor | hedef_rol=%s | test_modu=%s | egitim=%s | deneyim=%s", hedef_rol or "yok", test_modu, egitim or "yok", deneyim or "yok")
     ai_result = cv_analiz_et_json(text, hedef_rol=hedef_rol, test_modu=test_modu, egitim=egitim, deneyim=deneyim)
@@ -236,33 +231,16 @@ def save_interview(position: str, difficulty: str, questions: list, answers: lis
 
 @app.post("/profile")
 def save_profile(data: ProfileData, user=Depends(verify_token)):
-    try:
-        existing = supabase.table("profiles").select("*").eq("user_id", user.id).execute()
-    except Exception:
-        raise HTTPException(503, "Profil tablosu henuz olusturulmamis. Lutfen Supabase Dashboard'da migration SQL'ini calistirin.")
-    payload = data.model_dump(exclude_none=True)
-    payload["user_id"] = user.id
-    now = datetime.now(timezone.utc).isoformat()
-
-    if len(existing.data) > 0:
-        payload["updated_at"] = now
-        supabase.table("profiles").update(payload).eq("user_id", user.id).execute()
-        logger.info("Profil guncellendi: %s", user.id)
-    else:
-        payload["created_at"] = now
-        payload["updated_at"] = now
-        supabase.table("profiles").insert(payload).execute()
-        logger.info("Profil olusturuldu: %s", user.id)
-
+    existing_meta = dict(getattr(user, "user_metadata", {}) or {})
+    incoming = data.model_dump(exclude_none=True)
+    merged = {**existing_meta, **incoming}
+    _fresh_admin_client().auth.admin.update_user_by_id(user.id, {"user_metadata": merged})
+    logger.info("Profil guncellendi: %s", user.id)
     return {"message": "Profil basariyla kaydedildi"}
 
 @app.get("/profile")
 def get_profile(user=Depends(verify_token)):
-    try:
-        response = supabase.table("profiles").select("*").eq("user_id", user.id).execute()
-    except Exception:
-        return {}
-    if len(response.data) == 0:
-        return {}
-    return response.data[0]
+    meta = getattr(user, "user_metadata", {}) or {}
+    fields = ["name", "education", "target_role", "experience", "support_needs"]
+    return {k: meta.get(k) for k in fields if meta.get(k) is not None}
 
