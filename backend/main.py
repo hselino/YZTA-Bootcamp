@@ -135,11 +135,16 @@ async def upload_cv(
         "content_text": text,
     }).execute()
 
-    profil = supabase.table("profiles").select("education", "experience", "target_role").eq("user_id", user.id).execute()
-    egitim = profil.data[0].get("education") if profil.data else None
-    deneyim = profil.data[0].get("experience") if profil.data else None
-    if not hedef_rol and profil.data:
-        hedef_rol = hedef_rol or profil.data[0].get("target_role")
+    egitim = deneyim = None
+    try:
+        profil = supabase.table("profiles").select("education", "experience", "target_role").eq("user_id", user.id).execute()
+        if profil.data:
+            egitim = profil.data[0].get("education")
+            deneyim = profil.data[0].get("experience")
+            if not hedef_rol:
+                hedef_rol = profil.data[0].get("target_role")
+    except Exception:
+        logger.warning("Profil tablosu bulunamadi, profil bilgisi kullanilmadan devam ediliyor")
 
     logger.info("CV analizi basliyor | hedef_rol=%s | test_modu=%s | egitim=%s | deneyim=%s", hedef_rol or "yok", test_modu, egitim or "yok", deneyim or "yok")
     ai_result = cv_analiz_et_json(text, hedef_rol=hedef_rol, test_modu=test_modu, egitim=egitim, deneyim=deneyim)
@@ -231,7 +236,10 @@ def save_interview(position: str, difficulty: str, questions: list, answers: lis
 
 @app.post("/profile")
 def save_profile(data: ProfileData, user=Depends(verify_token)):
-    existing = supabase.table("profiles").select("*").eq("user_id", user.id).execute()
+    try:
+        existing = supabase.table("profiles").select("*").eq("user_id", user.id).execute()
+    except Exception:
+        raise HTTPException(503, "Profil tablosu henuz olusturulmamis. Lutfen Supabase Dashboard'da migration SQL'ini calistirin.")
     payload = data.model_dump(exclude_none=True)
     payload["user_id"] = user.id
     now = datetime.now(timezone.utc).isoformat()
@@ -250,7 +258,10 @@ def save_profile(data: ProfileData, user=Depends(verify_token)):
 
 @app.get("/profile")
 def get_profile(user=Depends(verify_token)):
-    response = supabase.table("profiles").select("*").eq("user_id", user.id).execute()
+    try:
+        response = supabase.table("profiles").select("*").eq("user_id", user.id).execute()
+    except Exception:
+        return {}
     if len(response.data) == 0:
         return {}
     return response.data[0]
