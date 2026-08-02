@@ -3,7 +3,7 @@
 AI destekli kariyer koçu — CV analizi, LinkedIn optimizasyonu ve mülakat simülasyonu sunan React Native mobil uygulaması.
 
 ## Canlı Uygulama
-
+- **Uygulama Linki:** https://expo.dev/accounts/sengka/projects/AICareerCoach/builds/728610f2-ef88-4590-b8f4-54ae9bc05f3f
 - **Backend API:** https://ai-career-coach-production-7df0.up.railway.app
 - **API Dokümantasyonu (Swagger/OpenAPI):** https://ai-career-coach-production-7df0.up.railway.app/docs
 
