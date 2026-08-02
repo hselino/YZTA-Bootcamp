@@ -90,7 +90,7 @@ Team 100
 
 | Hatice Selin Omur | Enes Bayraker | Sena Gül Kara | Merve Sueda Aydın |
 |:---:|:---:|:---:|:---:|
-| [![hselino](https://avatars.githubusercontent.com/u/75240792?size=100)](https://github.com/hselino) | [![EnesBayraker](https://avatars.githubusercontent.com/u/114603020?size=100)](https://github.com/EnesBayraker) | [![sengka](https://avatars.githubusercontent.com/u/195082180?size=100)](https://github.com/sengka) | [![mervesueda](https://avatars.githubusercontent.com/u/154811131?size=100)](https://github.com/mervesueda) |
+| <a href="https://github.com/hselino"><img src="https://avatars.githubusercontent.com/u/75240792?size=200" alt="Hatice Selin Omur" width="100" height="100"></a> | <a href="https://github.com/EnesBayraker"><img src="https://avatars.githubusercontent.com/u/114603020?size=200" alt="Enes Bayraker" width="100" height="100"></a> | <a href="https://github.com/sengka"><img src="https://avatars.githubusercontent.com/u/195082180?size=200" alt="Sena Gül Kara" width="100" height="100"></a> | <a href="https://github.com/mervesueda"><img src="https://avatars.githubusercontent.com/u/154811131?size=200" alt="Merve Sueda Aydın" width="100" height="100"></a> |
 
 ---
 
