@@ -1,4 +1,10 @@
 
+## Frontend-Backend Entegrasyonu
+
+Frontend, tamamı Railway'de canlı olan backend'e gerçek zamanlı bağlıdır (mock veri yok). Varsayılan backend adresi `src/config/env.js` içinde tanımlıdır; kendi local backend'inizle test etmek isterseniz proje köküne bir `.env` dosyası oluşturup `.env.example`'daki `EXPO_PUBLIC_API_URL` değişkenini override edebilirsiniz.
+
+Tüm endpoint tanımları ve response şemaları `src/services/api.js` içinde tek bir yerden yönetilir — kimlik doğrulama, CV analizi, LinkedIn optimizasyonu, mülakat simülasyonu ve profil yönetimi bu dosya üzerinden backend'e bağlanır.
+
 # AI Career Coach
 
 ## Takım Bilgileri

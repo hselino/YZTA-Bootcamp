@@ -1,115 +1,113 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { colors } from '../theme/colors';
+import React, { useMemo } from 'react';
+import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useThemeColors } from '../context/ThemeContext';
 import { typography } from '../theme/typography';
+import PrimaryButton from '../components/PrimaryButton';
 
 const LandingScreen = ({ navigation }) => {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.logoText}>🤖 AI Career Coach</Text>
-        </View>
-        
-        <Text style={styles.title}>
-          Kariyer Yolculuğunda Yapay Zeka Destekli Akıllı Rehberin
-        </Text>
-        <Text style={styles.subtitle}>
-          CV'nizi analiz edin, güçlü yönlerinizi keşfedin, kişiselleştirilmiş kariyer önerileri alın ve hedeflerinize daha hızlı ulaşın.
-        </Text>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Text style={styles.logoText}>🤖 AI Career Coach</Text>
+          </View>
 
-        <View style={styles.illustrationContainer}>
-          {/* Placeholder for illustration */}
-          <View style={styles.illustrationPlaceholder}>
-            <Text style={{color: colors.primary, fontWeight: 'bold'}}>CV Analysis</Text>
+          <Text style={styles.title}>
+            Kariyer Yolculuğunda Yapay Zeka Destekli Akıllı Rehberin
+          </Text>
+          <Text style={styles.subtitle}>
+            CV'nizi analiz edin, güçlü yönlerinizi keşfedin, kişiselleştirilmiş kariyer önerileri alın ve hedeflerinize daha hızlı ulaşın.
+          </Text>
+
+          <View style={styles.illustrationContainer}>
+            <View style={styles.illustrationCircle}>
+              <Ionicons name="document-text" size={72} color={colors.primary} />
+              <View style={styles.illustrationBadge}>
+                <Ionicons name="sparkles" size={20} color={colors.white} />
+              </View>
+            </View>
           </View>
         </View>
 
+        <View style={styles.footer}>
+          <PrimaryButton label="Ücretsiz Başla" onPress={() => navigation.navigate('Register')} />
+          <PrimaryButton
+            label="Zaten Hesabım Var"
+            variant="outline"
+            onPress={() => navigation.navigate('Login')}
+            style={{ marginTop: 12 }}
+          />
+        </View>
       </View>
-      
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={styles.primaryButton}
-          onPress={() => navigation.replace('MainTabs')}
-        >
-          <Text style={styles.primaryButtonText}>Ücretsiz Başla</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.secondaryButton}>
-          <Text style={styles.secondaryButtonText}>Nasıl Çalışır?</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    padding: 24,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  header: {
-    marginBottom: 40,
-  },
-  logoText: {
-    ...typography.h3,
-    color: colors.primary,
-    fontWeight: 'bold',
-  },
-  title: {
-    ...typography.h1,
-    color: colors.text,
-    marginBottom: 16,
-  },
-  subtitle: {
-    ...typography.body,
-    color: colors.textSecondary,
-    lineHeight: 24,
-    marginBottom: 40,
-  },
-  illustrationContainer: {
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  illustrationPlaceholder: {
-    width: 200,
-    height: 200,
-    backgroundColor: colors.primaryLight,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  footer: {
-    gap: 12,
-    marginBottom: 20,
-  },
-  primaryButton: {
-    backgroundColor: colors.primary,
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  primaryButtonText: {
-    ...typography.body,
-    color: colors.white,
-    fontWeight: '600',
-  },
-  secondaryButton: {
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  secondaryButtonText: {
-    ...typography.body,
-    color: colors.text,
-    fontWeight: '600',
-  },
-});
+const createStyles = (colors) =>
+  StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    container: {
+      flex: 1,
+      padding: 24,
+    },
+    content: {
+      flex: 1,
+      justifyContent: 'center',
+    },
+    header: {
+      marginBottom: 40,
+    },
+    logoText: {
+      ...typography.h3,
+      color: colors.primary,
+      fontWeight: 'bold',
+    },
+    title: {
+      ...typography.h1,
+      color: colors.text,
+      marginBottom: 16,
+    },
+    subtitle: {
+      ...typography.body,
+      color: colors.textSecondary,
+      lineHeight: 24,
+      marginBottom: 40,
+    },
+    illustrationContainer: {
+      alignItems: 'center',
+      marginVertical: 20,
+    },
+    illustrationCircle: {
+      width: 200,
+      height: 200,
+      backgroundColor: colors.primaryLight,
+      borderRadius: 100,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    illustrationBadge: {
+      position: 'absolute',
+      bottom: 12,
+      right: 12,
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 3,
+      borderColor: colors.background,
+    },
+    footer: {
+      marginBottom: 20,
+    },
+  });
 
 export default LandingScreen;
