@@ -16,6 +16,57 @@ Backend, Railway üzerinde (FastAPI + Supabase + Google Gemini) canlı olarak ç
 
 ---
 
+## Jüri / Değerlendirici Nasıl Dener?
+
+Ürün iki şekilde test edilebilir.
+
+### 1) Backend API — kurulum gerektirmez
+
+Backend canlı ve tüm yapay zeka modülleri (CV analizi, mülakat simülasyonu, LinkedIn optimizasyonu) çalışır durumdadır. Tüm uçlar **Swagger** arayüzünden test edilebilir:
+
+**https://ai-career-coach-production-7df0.up.railway.app/docs**
+
+**Adım adım:**
+
+1. **Kayıt ol:** `POST /register` → alanlar: `email`, `password`, `name` → "Try it out" → Execute.
+2. **Giriş yap:** `POST /login` → `email`, `password` → cevaptaki `access_token`'ı kopyala.
+3. **Token'ı tanımla:** Sayfanın üstündeki **Authorize** butonuna `Bearer <access_token>` yazıp tanımla.
+4. **CV yükle ve analiz et:** `POST /upload-cv` → `file` alanına bir PDF/DOCX CV seç (istersen `hedef_rol` gir) → Execute. AI, puan karnesi + güçlü/zayıf yönler + hedef role uygunluk döndürür.
+5. **Diğer modüller:**
+   - `POST /interview/start` → `position` ve `difficulty` (örn. `"orta"`) ile mülakat başlat; `POST /interview/{id}/answer` ile cevapla; `POST /interview/{id}/finish` ile raporu al.
+   - `POST /linkedin/analyze` → `headline`, `about`, `skills` vb. ile LinkedIn profil analizi al.
+   - `GET /analyses`, `GET /interviews`, `GET /linkedin/analyses` → geçmiş kayıtlar.
+
+> Not: `test_modu` alanı `false` bırakılırsa gerçek yapay zeka (Gemini) çalışır; `true` ise hızlı demo cevapları döner.
+
+**Curl ile hızlı test (register/login alanları query parametresi olarak gönderilir):**
+
+```
+# Kayıt ol
+curl -X POST "https://ai-career-coach-production-7df0.up.railway.app/register?email=juri@test.com&password=Juri1234!&name=Juri"
+
+# Giriş yap → access_token al
+curl -X POST "https://ai-career-coach-production-7df0.up.railway.app/login?email=juri@test.com&password=Juri1234!"
+
+# CV yükle (token ile)
+curl -X POST "https://ai-career-coach-production-7df0.up.railway.app/upload-cv" \
+  -H "Authorization: Bearer <access_token>" \
+  -F "file=@ornek_cv.pdf"
+```
+
+### 2) Mobil uygulama (Expo / React Native)
+
+Uygulama bir mobil uygulamadır; bilgisayarda tarayıcıda açılmaz, telefonda **Expo Go** ile çalıştırılır:
+
+```
+npm install
+npx expo start
+```
+
+Telefonunuzdaki **Expo Go** uygulamasıyla QR kodu okutun. Uygulama varsayılan olarak canlı backend'e (Railway) bağlıdır; kayıt olup CV yükleme, mülakat ve LinkedIn özelliklerini kullanabilirsiniz.
+
+---
+
 ## Takım Bilgileri
 
 ### Takım Adı
