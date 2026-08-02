@@ -1,6 +1,21 @@
 
 # AI Career Coach
 
+## Canlı Uygulama
+
+- **Backend API:** https://ai-career-coach-production-7df0.up.railway.app
+- **API Dokümantasyonu (Swagger/OpenAPI):** https://ai-career-coach-production-7df0.up.railway.app/docs
+
+Backend, Railway üzerinde (FastAPI + Supabase + Google Gemini) canlı olarak çalışmaktadır. Frontend, Expo (React Native) mobil uygulaması olarak bu backend'e bağlıdır.
+
+**Repo Yapısı:**
+
+- `src/`, `App.js` → Expo (React Native) frontend
+- `backend/` → FastAPI backend (auth, CV analizi, mülakat simülasyonu, LinkedIn optimizasyonu)
+- `supabase_migration*.sql` → Supabase veritabanı şemaları
+
+---
+
 ## Takım Bilgileri
 
 ### Takım Adı
