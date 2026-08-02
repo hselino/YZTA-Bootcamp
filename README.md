@@ -289,3 +289,163 @@ Sprint sonunda ekip içi test ve değerlendirmede şu sonuçlara ulaşıldı:
 3. In-review kolonundaki task'lar hafta başında gözden geçirilip Done'a taşınacak.
 4. WIP limiti belirlenecek ve board, task tamamlanır tamamlanmaz güncellenecek (gecikme olmayacak).
 5. Her Daily Scrum'da tüm ekip üyelerinden kısa da olsa güncelleme alınması zorunlu hale getirilecek.
+
+# Sprint 3
+
+## 1. Backlog Dağıtma Mantığı
+
+**Sprint Hedefi:** Sprint 2 sonunda backend güçlü ilerlerken frontend'in geride kaldığı tespit edilmişti. Sprint 3'ün odağı bu dengesizliği kapatmak ve ürünü **canlıya çıkarılabilir** hale getirmekti: tüm ekranların gerçek backend'e bağlanması, AI destekli LinkedIn ve Mülakat modüllerinin uçtan uca çalışır hale getirilmesi, kritik bug'ların giderilmesi ve genel kullanıcı deneyiminin production kalitesine çıkarılması.
+
+**Önceliklendirme mantığı:** Sprint 2 retrospective'inde alınan "entegrasyon önceliği" kararına sadık kalınarak görevler şu katmanlarda ele alındı:
+
+- **P0 — Kritik Bug'lar:** Kullanıcı kaydı sonrası oturum çakışması, CV dosya yükleme hatası (Expo SDK 57 uyumsuzluğu), profil verisinin hesaplar arası karışması gibi ürünü kullanılamaz hale getiren hatalar.
+- **P0 — AI Modüllerinin Canlıya Alınması:** LinkedIn optimizasyonu ve mülakat simülasyonu AI servislerinin Railway'e deploy edilip frontend'e bağlanması.
+- **P1 — Kullanıcı Deneyimi Sağlamlaştırma:** Boş durumlar, yüklenme animasyonları, oturum süresi yönetimi, navigasyon hatalarının giderilmesi.
+- **P1 — Görsel Kimlik ve Tutarlılık:** Paylaşılan tasarım sistemi, dark mode, marka kimliğine uygun app icon/splash.
+- **P2 — Kapsam Kararı:** Kariyer Yol Haritası özelliği geliştirilip test edildikten sonra, ek bakım yükü ve sınırlı kullanıcı değeri nedeniyle ekip tarafından **kapsam dışı bırakıldı**.
+
+**Dağıtım mantığı:** Backend stabilizasyonu ve AI servislerinin deploy'u Enes ve Merve'de, frontend entegrasyonu ve UI/UX işleri Selin'de, ürün kapsam kararları Sena ile birlikte alındı. Görevler GitHub Projects Scrum Board üzerinden takip edildi.
+
+---
+
+## 2. Daily Scrum Notları
+
+<details>
+<summary><b>📅 Gün 1 — Supabase entegrasyonu ve auth sağlamlaştırma</b></summary>
+
+- **Selin:** Supabase backend'ini frontend'e bağladım. Kayıt sonrası "User not allowed" hatası tespit edildi.
+- **Kök neden:** Login sırasında paylaşılan Supabase client'ın kendi Authorization header'ını değiştirmesi — izole client kullanımıyla düzeltildi. E-posta onay akışı, ücretsiz plandaki gönderim limiti nedeniyle kaldırıldı.
+- **Blocker:** Yok.
+
+</details>
+
+<details>
+<summary><b>📅 Gün 2 — Onboarding, CV yükleme ve kritik dosya bug'ı</b></summary>
+
+- **Selin:** Onboarding gerçek zamanlı `/profile` endpoint'ine bağlandı. CV yüklemede "sunucuya ulaşılamadı" hatası tespit edildi.
+- **Kök neden:** Expo SDK 57'nin eski dosya yükleme yöntemini artık desteklememesi — `expo-file-system`'in `File` sınıfı + `expo/fetch` ile çözüldü. Ayrıca geçmişteki çirkin UUID dosya adı bug'ı da düzeltildi.
+- **Blocker:** Yok.
+
+</details>
+
+<details>
+<summary><b>📅 Gün 3 — Kullanıcı tekilleştirme bug'ı</b></summary>
+
+- **Selin:** Farklı hesaplarla girişte ismin hep aynı göründüğü tespit edildi. Kök neden: profil verisinin cihazda hesap bazında ayrıştırılmadan saklanması. Profil verisi tamamen backend'e (Supabase `user_metadata`) taşındı.
+- **Blocker:** Yok.
+
+</details>
+
+<details>
+<summary><b>📅 Gün 4 — Railway deploy geçişi ve LinkedIn/Mülakat frontend'i</b></summary>
+
+- **Enes:** Backend'i Railway'e deploy ettim, onboarding tablosunu ekledim.
+- **Merve:** LinkedIn optimizasyonu ve mülakat simülasyonu AI servislerini geliştirdim, pushladım.
+- **Selin:** Backend adresini Railway'e çevirdim. Merve'nin backend'i henüz deploy edilmemişti; buna rağmen LinkedIn ve Mülakat ekranlarını backend'in API şekline birebir uyumlu olacak şekilde proaktif olarak inşa ettim.
+- **Blocker:** AI özellikleri kodu hazır ama henüz canlı değildi.
+
+</details>
+
+<details>
+<summary><b>📅 Gün 5 — CV sonuç ekranı yeniden tasarımı ve UI sistemi kararı</b></summary>
+
+- **Selin:** Analiz Sonuçları ekranının sıkışık olduğu ve paylaş butonunun çalışmadığı geri bildirimi alındı; ekran skor kartı, kategori bazlı skorlar, güçlü yönler ve eksik/çözüm bloklarıyla yeniden tasarlandı, gerçek paylaşım fonksiyonu eklendi.
+- **Karar:** Bu geri bildirim sonrası tüm uygulama genelinde tutarlı bir tasarım sistemi kurulmasına karar verildi.
+
+</details>
+
+<details>
+<summary><b>📅 Gün 6 — Paylaşılan tasarım sistemi</b></summary>
+
+- **Selin:** `Card`, `PrimaryButton`, `Chip`, `TextField`, `SectionTitle`, `ActionCard` gibi ortak bileşenler oluşturulup tüm ekranlara uygulandı.
+
+</details>
+
+<details>
+<summary><b>📅 Gün 7 — Profil sekmesi ve kullanıcı deneyimi iyileştirmeleri</b></summary>
+
+- **Selin:** Profil sekmesi eklendi. Ardından boş durum tasarımları, skeleton yüklenme animasyonu, pull-to-refresh, haptic geri bildirim ve sayarak yükselen skor animasyonları eklendi.
+
+</details>
+
+<details>
+<summary><b>📅 Gün 8 — Dark mode ve marka kimliği</b></summary>
+
+- **Selin:** Sistem temasını takip eden tam kapsamlı dark mode kuruldu (14 ekran + 7 bileşen). Varsayılan Expo şablon ikonu, marka renklerine uygun özel bir ikon/splash ile değiştirildi.
+
+</details>
+
+<details>
+<summary><b>📅 Gün 9 — LinkedIn/Mülakat canlıya alınması</b></summary>
+
+- **Enes:** Supabase service_role anahtarını Railway'e tanımlayıp AI backend'ini deploy etti. LinkedIn ve Mülakat AI özellikleri canlıya alındı.
+- **Selin:** Canlı ortamda LinkedIn ve Mülakat endpoint'lerini gerçek isteklerle doğruladım — ikisi de çalışıyor.
+- **Karar:** Ekip içi paylaşılan servis anahtarlarının sohbet yerine doğrudan Railway paneline girilmesi kuralı benimsendi.
+
+</details>
+
+<details>
+<summary><b>📅 Gün 10 — Kariyer Yol Haritası: geliştirme ve kapsam dışı bırakma kararı</b></summary>
+
+- **Selin:** Kariyer Yol Haritası için AI destekli üretim mantığı ve backend endpoint'leri geliştirildi, gerçek veritabanı şemasına karşı uçtan uca test edildi.
+- **Karar:** Canlıya çıkış öncesi kapsam gözden geçirmesinde, bu özelliğin MVP kapsamından çıkarılmasına karar verildi.
+- **Ek geliştirme:** Yerine, geçmiş LinkedIn ve Mülakat analizlerinin görüntülenebileceği sekmeli bir Geçmiş ekranı geliştirildi.
+
+</details>
+
+<details>
+<summary><b>📅 Gün 11 — Şifremi Unuttum akışı ve son sağlamlaştırmalar</b></summary>
+
+- **Selin:** Şifremi Unuttum akışı eklendi. Oturum süresi dolduğunda otomatik olarak Giriş ekranına, anlaşılır bir uyarıyla yönlendirme sağlandı. Geri gidecek ekran olmadığında oluşan navigasyon çökmesi giderildi.
+
+</details>
+
+---
+
+## 3. Sprint Board Updates
+
+<img width="1361" height="972" alt="Ekran Resmi 2026-08-02 15 39 40" src="https://github.com/user-attachments/assets/05d850e6-8fbe-457c-85e7-0f3fc240abf2" />
+<img width="1246" height="855" alt="Ekran Resmi 2026-08-02 15 39 32" src="https://github.com/user-attachments/assets/bca2091e-7c12-4608-b341-387b9b317745" />
+---
+
+## 4. Ürün Durumu
+
+Sprint 3 sonunda ürün, gerçek cihaz/simülatör üzerinde uçtan uca test edilmiş, canlı (Railway + Supabase) bir backend'e bağlı durumdadır.
+
+**Uçtan uca doğrulanmış ve çalışan akışlar:**
+
+1. Kimlik doğrulama (kayıt, giriş, çıkış, oturum süresi yönetimi)
+2. CV Analizi (yükleme → AI analizi → sonuç → geçmiş)
+3. LinkedIn Optimizasyonu (canlı ortamda doğrulandı)
+4. Mülakat Simülasyonu (canlı ortamda doğrulandı)
+5. Profil (düzenlenebilir bilgiler + gerçek kullanım istatistikleri)
+6. Geçmiş (CV / LinkedIn / Mülakat sekmeleri)
+7. Dark mode, marka ikonu/splash, tutarlı tasarım dili
+
+---
+
+## 5. Sprint Review
+
+**Planlandığı gibi başarılanlar:**
+- Sprint 2'de tespit edilen frontend-backend dengesizliği kapatıldı.
+- LinkedIn ve Mülakat AI modülleri geliştirildi, deploy edildi ve canlı ortamda doğrulandı.
+- Dört kritik bug (auth çakışması, dosya yükleme, kullanıcı tekilleştirme, navigasyon çökmesi) giderildi.
+- Tutarlı bir tasarım sistemi, dark mode ve marka kimliği kuruldu.
+- Kapsam disiplini gösterildi: yarım kalacak bir özellik yerine tamamlanmış bir alternatif sunuldu.
+
+
+---
+
+## 6. Sprint Retrospective
+
+**👍 İyi gidenler:**
+- Kritik bug'ların kök nedenine inilerek kalıcı çözümler üretilmesi.
+- Gerçek kullanıcı geri bildirimine hızlı reaksiyon verilmesi.
+- Deploy edilmemiş bir özelliğin frontend'inin proaktif hazırlanması, deploy anında zaman kaybettirmedi.
+- Roadmap özelliğinde doğru kapsam kararının alınabilmesi.
+
+**💡 Geliştirilmesi gerekenler:**
+- Servis anahtarı gibi hassas bilgilerin paylaşım kuralları sprint başında netleşmeliydi.
+- Üçüncü parti yapılandırma gerektiren özellikler (şifre sıfırlama), geliştirme öncesi koordine edilmeliydi.
+
+**🎯 Genel Değerlendirme:** Üç sprint sonunda AI Career Coach, üç ayrı AI destekli modülü uçtan uca çalışır, test edilmiş ve tutarlı bir kullanıcı deneyimiyle sunan bir ürüne dönüşmüştür.
