@@ -1,5 +1,6 @@
 
 # AI Career Coach
+AI destekli kariyer koçu — CV analizi, LinkedIn optimizasyonu ve mülakat simülasyonu sunan React Native mobil uygulaması.
 
 ## Canlı Uygulama
 
@@ -473,10 +474,19 @@ Sprint sonunda ekip içi test ve değerlendirmede şu sonuçlara ulaşıldı:
 <img width="1361" height="972" alt="Ekran Resmi 2026-08-02 15 39 40" src="https://github.com/user-attachments/assets/05d850e6-8fbe-457c-85e7-0f3fc240abf2" />
 <img width="1246" height="855" alt="Ekran Resmi 2026-08-02 15 39 32" src="https://github.com/user-attachments/assets/bca2091e-7c12-4608-b341-387b9b317745" />
 ---
-
+https://github.com/users/hselino/projects/2/views/1
+ 
 ## 4. Ürün Durumu
 
 Sprint 3 sonunda ürün, gerçek cihaz/simülatör üzerinde uçtan uca test edilmiş, canlı (Railway + Supabase) bir backend'e bağlı durumdadır.
+
+
+<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 Pro - 2026-08-02 at 18 23 03" src="https://github.com/user-attachments/assets/12d9b495-b0b8-404f-b32a-c25e5524b9fc" />
+<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 Pro - 2026-08-02 at 18 22 58" src="https://github.com/user-attachments/assets/2de54ff4-90a3-4e73-97f3-1e5e928850e1" />
+<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 Pro - 2026-08-02 at 18 22 43" src="https://github.com/user-attachments/assets/699d729b-dafe-4428-9107-85e1df76cf82" />
+<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 Pro - 2026-08-02 at 18 22 40" src="https://github.com/user-attachments/assets/40f3f4c2-24ef-4579-a2b9-feadd81957bc" />
+<img width="1206" height="2622" alt="Simulator Screenshot - iPhone 17 Pro - 2026-08-02 at 18 22 34" src="https://github.com/user-attachments/assets/fedf59fb-8763-4548-8b98-8a10956fc365" />
+
 
 **Uçtan uca doğrulanmış ve çalışan akışlar:**
 
