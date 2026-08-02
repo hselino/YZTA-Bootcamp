@@ -86,6 +86,12 @@ Team 100
 - Backend Developer: Enes Bayraker, Sena Gül Kara
 - AI Developer: Merve Sueda Aydın
 
+## Katkıda Bulunanlar
+
+| Hatice Selin Omur | Enes Bayraker | Sena Gül Kara | Merve Sueda Aydın |
+|:---:|:---:|:---:|:---:|
+| [![hselino](https://github.com/hselino.png?size=100)](https://github.com/hselino) | [![EnesBayraker](https://github.com/EnesBayraker.png?size=100)](https://github.com/EnesBayraker) | [![sengka](https://github.com/sengka.png?size=100)](https://github.com/sengka) | [![mervesueda](https://github.com/mervesueda.png?size=100)](https://github.com/mervesueda) |
+
 ---
 
 ## Ürün Bilgisi
