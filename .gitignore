@@ -40,3 +40,14 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# backend
+__pycache__/
+*.pyc
+uploads/
+backend/venv/
+backend/__pycache__/
+*.pdf
+*.docx
+*.doc
+tempCodeRunnerFile.py
