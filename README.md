@@ -19,9 +19,25 @@ Backend, Railway üzerinde (FastAPI + Supabase + Google Gemini) canlı olarak ç
 
 ## Jüri / Değerlendirici Nasıl Dener?
 
-Ürün iki şekilde test edilebilir.
+Ürün iki şekilde test edilebilir: hazır **Android APK** ile mobil uygulama veya canlı **backend API** üzerinden.
 
-### 1) Backend API — kurulum gerektirmez
+### 1) Mobil uygulama (Android APK)
+
+Uygulama bir mobil uygulamadır; bilgisayarda tarayıcıda açılmaz, telefonunuza kurulur. Android için hazır **APK**:
+
+**https://expo.dev/accounts/sengka/projects/AICareerCoach/builds/728610f2-ef88-4590-b8f4-54ae9bc05f3f**
+
+**Adım adım:**
+
+1. APK linkini telefonunuzda açın ve dosyayı indirin.
+2. İndirilen APK'yı kurun (Android, "bilinmeyen kaynaklardan kurulum" iznini isteyebilir).
+3. Uygulamayı açın, kayıt olun; CV analizi, mülakat simülasyonu ve LinkedIn optimizasyonunu deneyin.
+
+Uygulama varsayılan olarak canlı backend'e (Railway) bağlıdır; ek kurulum gerekmez.
+
+> **Geliştiriciler için alternatif (Expo Go):** Kaynak koddan çalıştırmak isteyenler `npm install` → `npx expo start` komutlarıyla Expo Go üzerinden test edebilir (Expo Go'nun projeyle uyumlu SDK sürümünü kullandığınızdan emin olun).
+
+### 2) Backend API — kurulum gerektirmez
 
 Backend canlı ve tüm yapay zeka modülleri (CV analizi, mülakat simülasyonu, LinkedIn optimizasyonu) çalışır durumdadır. Tüm uçlar **Swagger** arayüzünden test edilebilir:
 
@@ -54,17 +70,6 @@ curl -X POST "https://ai-career-coach-production-7df0.up.railway.app/upload-cv" 
   -H "Authorization: Bearer <access_token>" \
   -F "file=@ornek_cv.pdf"
 ```
-
-### 2) Mobil uygulama (Expo / React Native)
-
-Uygulama bir mobil uygulamadır; bilgisayarda tarayıcıda açılmaz, telefonda **Expo Go** ile çalıştırılır:
-
-```
-npm install
-npx expo start
-```
-
-Telefonunuzdaki **Expo Go** uygulamasıyla QR kodu okutun. Uygulama varsayılan olarak canlı backend'e (Railway) bağlıdır; kayıt olup CV yükleme, mülakat ve LinkedIn özelliklerini kullanabilirsiniz.
 
 ---
 
@@ -474,8 +479,8 @@ Sprint sonunda ekip içi test ve değerlendirmede şu sonuçlara ulaşıldı:
 <img width="1361" height="972" alt="Ekran Resmi 2026-08-02 15 39 40" src="https://github.com/user-attachments/assets/05d850e6-8fbe-457c-85e7-0f3fc240abf2" />
 <img width="1246" height="855" alt="Ekran Resmi 2026-08-02 15 39 32" src="https://github.com/user-attachments/assets/bca2091e-7c12-4608-b341-387b9b317745" />
 ---
-https://github.com/users/hselino/projects/2/views/1
- 
+- **Sprint Board:** https://github.com/users/hselino/projects/2/views/1
+
 ## 4. Ürün Durumu
 
 Sprint 3 sonunda ürün, gerçek cihaz/simülatör üzerinde uçtan uca test edilmiş, canlı (Railway + Supabase) bir backend'e bağlı durumdadır.
