@@ -1,11 +1,47 @@
 
-# AI Career Coach
-AI destekli kariyer koçu — CV analizi, LinkedIn optimizasyonu ve mülakat simülasyonu sunan React Native mobil uygulaması.
+<p align="center">
+  <img src="assets/icon.png" width="120" height="120" alt="AI Career Coach" />
+</p>
+
+<h1 align="center">AI Career Coach</h1>
+
+<p align="center">
+  <b>AI destekli kariyer koçu</b> — CV analizi, LinkedIn optimizasyonu ve mülakat simülasyonu sunan React Native mobil uygulaması.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/React%20Native-61DAFB?style=for-the-badge&logo=react&logoColor=white" alt="React Native" />
+  <img src="https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white" alt="Expo" />
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
+  <img src="https://img.shields.io/badge/Gemini-4285F4?style=for-the-badge&logo=googlegemini&logoColor=white" alt="Google Gemini" />
+  <img src="https://img.shields.io/badge/Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white" alt="Railway" />
+</p>
+
+---
+
+## İçindekiler
+
+- [Canlı Uygulama](#canlı-uygulama)
+- [Jüri / Değerlendirici Nasıl Dener?](#jüri--değerlendirici-nasıl-dener)
+- [Takım Bilgileri](#takım-bilgileri)
+- [Katkıda Bulunanlar](#katkıda-bulunanlar)
+- [Ürün Bilgisi](#ürün-bilgisi)
+- [Ürün Özellikleri](#ürün-özellikleri)
+- [Hedef Kitle](#hedef-kitle)
+- [Sprint 1](#sprint-1)
+- [Sprint 2](#sprint-2)
+- [Sprint 3](#sprint-3)
+
+---
 
 ## Canlı Uygulama
-- **Uygulama Linki:** https://expo.dev/accounts/sengka/projects/AICareerCoach/builds/728610f2-ef88-4590-b8f4-54ae9bc05f3f
-- **Backend API:** https://ai-career-coach-production-7df0.up.railway.app
-- **API Dokümantasyonu (Swagger/OpenAPI):** https://ai-career-coach-production-7df0.up.railway.app/docs
+
+<p align="center">
+  <a href="https://expo.dev/accounts/sengka/projects/AICareerCoach/builds/728610f2-ef88-4590-b8f4-54ae9bc05f3f"><img src="https://img.shields.io/badge/Android%20APK-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android APK" /></a>
+  <a href="https://ai-career-coach-production-7df0.up.railway.app"><img src="https://img.shields.io/badge/Backend%20API-0B0D0E?style=for-the-badge&logo=railway&logoColor=white" alt="Backend API" /></a>
+  <a href="https://ai-career-coach-production-7df0.up.railway.app/docs"><img src="https://img.shields.io/badge/Swagger%2FOpenAPI-85EA2D?style=for-the-badge&logo=swagger&logoColor=black" alt="Swagger/OpenAPI" /></a>
+</p>
 
 Backend, Railway üzerinde (FastAPI + Supabase + Google Gemini) canlı olarak çalışmaktadır. Frontend, Expo (React Native) mobil uygulaması olarak bu backend'e bağlıdır.
 
@@ -35,6 +71,7 @@ Uygulama bir mobil uygulamadır; bilgisayarda tarayıcıda açılmaz, telefonunu
 
 Uygulama varsayılan olarak canlı backend'e (Railway) bağlıdır; ek kurulum gerekmez.
 
+> [!NOTE]
 > **Geliştiriciler için alternatif (Expo Go):** Kaynak koddan çalıştırmak isteyenler `npm install` → `npx expo start` komutlarıyla Expo Go üzerinden test edebilir (Expo Go'nun projeyle uyumlu SDK sürümünü kullandığınızdan emin olun).
 
 ### 2) Backend API — kurulum gerektirmez
@@ -54,7 +91,8 @@ Backend canlı ve tüm yapay zeka modülleri (CV analizi, mülakat simülasyonu,
    - `POST /linkedin/analyze` → `headline`, `about`, `skills` vb. ile LinkedIn profil analizi al.
    - `GET /analyses`, `GET /interviews`, `GET /linkedin/analyses` → geçmiş kayıtlar.
 
-> Not: `test_modu` alanı `false` bırakılırsa gerçek yapay zeka (Gemini) çalışır; `true` ise hızlı demo cevapları döner.
+> [!IMPORTANT]
+> `test_modu` alanı `false` bırakılırsa gerçek yapay zeka (Gemini) çalışır; `true` ise hızlı demo cevapları döner.
 
 **Curl ile hızlı test (register/login alanları query parametresi olarak gönderilir):**
 
@@ -88,9 +126,13 @@ Team 100
 
 ## Katkıda Bulunanlar
 
+<div align="center">
+
 | Hatice Selin Omur | Enes Bayraker | Sena Gül Kara | Merve Sueda Aydın |
 |:---:|:---:|:---:|:---:|
 | <a href="https://github.com/hselino"><img src="https://avatars.githubusercontent.com/u/75240792?size=200" alt="Hatice Selin Omur" width="100" height="100"></a> | <a href="https://github.com/EnesBayraker"><img src="https://avatars.githubusercontent.com/u/114603020?size=200" alt="Enes Bayraker" width="100" height="100"></a> | <a href="https://github.com/sengka"><img src="https://avatars.githubusercontent.com/u/195082180?size=200" alt="Sena Gül Kara" width="100" height="100"></a> | <a href="https://github.com/mervesueda"><img src="https://avatars.githubusercontent.com/u/154811131?size=200" alt="Merve Sueda Aydın" width="100" height="100"></a> |
+
+</div>
 
 ---
 
